@@ -1,0 +1,21 @@
+package org.okky.article.application.command;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class WriteArticleCommand {
+    String boardId;
+    String writerId;
+    String writerName;
+    String title;
+    String body;
+    List<String> tags;
+}

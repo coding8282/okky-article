@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.okky.article.domain.repository.ArticleMapper">
+    <sql id="sql-filter">
+        <where>
+            <trim suffixOverrides="AND|OR">
+                <if test="boardId!=null">
+                    A.BOARD_ID = #{boardId} AND
+                </if>
+                <if test="writerId!=null">
+                    A.WRITER_ID = #{writerId} AND
+                </if>
+                <if test="status!=null">
+                    A.STATUS=#{status} AND
+                </if>
+                <if test="choice!=null">
+                    A.CHOOSED_ON IS NOT NULL AND
+                </if>
+                <if test="search!=null and search!=''">
+                    (LOWER(A.TITLE) LIKE CONCAT('%',LOWER(#{search}),'%') OR LOWER(A.BODY) LIKE CONCAT('%',LOWER(#{search}),'%')) AND
+                </if>
+            </trim>
+        </where>
+    </sql>
+
+    <select id="selectOne" resultMap="map-article">
+    SELECT
+        A.ID,
+        B.ID AS BOARD_ID,
+        B.NAME AS BOARD_NAME,
+        A.WRITER_ID,
+        A.WRITER_NAME,
+        A.WROTE_ON,
+        A.UPDATED_ON,
+        A.CHOOSED_ON,
+        A.TITLE,
+        A.BODY,
+        A.HIT_COUNT,
+        (SELECT COUNT(*) FROM article_scrap S WHERE A.ID = S.ARTICLE_ID) AS SCRAP_COUNT,
+        IF(A.WRITER_ID=#{myId}, 'TRUE','FALSE') AS WROTE_BY_ME,
+        (SELECT COUNT(*)>0 FROM article_scrap S WHERE A.ID=S.ARTICLE_ID AND S.SCRAPPER_ID=#{myId}) as SCRAPPED_BY_ME,
+        IF(A.STATUS='BLOCKED', 'TRUE','FALSE') AS BLOCKED,
+        IF(A.STATUS='DELETED', 'TRUE','FALSE') AS DELETED,
+        IF(A.STATUS='DELETED_FORCE', 'TRUE','FALSE') AS DELETED_FORCE,
+        IF(A.CHOOSED_ON IS NOT NULL, 'TRUE','FALSE') AS CHOOSED,
+        A.STATUS
+    FROM article A
+    INNER JOIN board B ON B.ID = A.BOARD_ID
+    WHERE A.ID=#{id} AND A.STATUS!='DELETED'
+    </select>
+    <select id="select" resultMap="map-article">
+        SELECT
+        A.ID,
+        B.ID AS BOARD_ID,
+        B.NAME AS BOARD_NAME,
+        A.WRITER_ID,
+        A.WRITER_NAME,
+        A.WROTE_ON,
+        A.TITLE,
+        SUBSTRING(A.BODY,1,100) AS BODY_REDUCED,
+        A.HIT_COUNT,
+        (SELECT COUNT(*) FROM article_scrap S WHERE A.ID = S.ARTICLE_ID) AS SCRAP_COUNT,
+        IF(A.STATUS='BLOCKED', 'TRUE','FALSE') AS BLOCKED,
+        IF(A.STATUS='DELETED', 'TRUE','FALSE') AS DELETED,
+        IF(A.STATUS='DELETED_FORCE', 'TRUE','FALSE') AS DELETED_FORCE,
+        IF(A.CHOOSED_ON IS NOT NULL, 'TRUE','FALSE') AS CHOOSED,
+        A.STATUS
+        FROM article A
+        INNER JOIN board B ON B.ID = A.BOARD_ID
+        <where>
+            <trim suffixOverrides="AND|OR">
+                <if test="boardId!=null">
+                    A.BOARD_ID = #{boardId} AND
+                </if>
+                <if test="writerId!=null">
+                    A.WRITER_ID = #{writerId} AND
+                </if>
+                <if test="excludeDeleted">
+                    A.STATUS!='DELETED' AND
+                </if>
+                <if test="choice!=null">
+                    A.CHOOSED_ON IS NOT NULL AND
+                </if>
+                <if test="search!=null and search!=''">
+                    (LOWER(A.TITLE) LIKE CONCAT('%',LOWER(#{search}),'%') OR LOWER(A.BODY) LIKE CONCAT('%',LOWER(#{search}),'%')) AND
+                </if>
+            </trim>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="sort=='wroteOn'">A.WROTE_ON ${order}</when>
+            <when test="sort=='choosedOn'">A.CHOOSED_ON ${order}</when>
+            <when test="sort=='hitCount'">A.HIT_COUNT ${order}</when>
+            <when test="sort=='scrapCount'">SCRAP_COUNT ${order}</when>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="selectFromScrap" resultMap="map-article">
+        SELECT
+        A.ID,
+        B.ID AS BOARD_ID,
+        B.NAME AS BOARD_NAME,
+        A.WRITER_ID,
+        A.WRITER_NAME,
+        A.WROTE_ON,
+        A.TITLE,
+        SUBSTRING(A.BODY,1,100) AS BODY_REDUCED,
+        A.HIT_COUNT,
+        (SELECT COUNT(*) FROM article_scrap S WHERE A.ID = S.ARTICLE_ID) AS SCRAP_COUNT,
+        IF(A.STATUS='BLOCKED', 'TRUE','FALSE') AS BLOCKED,
+        IF(A.STATUS='DELETED', 'TRUE','FALSE') AS DELETED,
+        IF(A.STATUS='DELETED_FORCE', 'TRUE','FALSE') AS DELETED_FORCE,
+        IF(A.CHOOSED_ON IS NOT NULL, 'TRUE','FALSE') AS CHOOSED,
+        A.STATUS
+        FROM (
+        SELECT *
+        FROM article_scrap S
+        WHERE S.SCRAPPER_ID=#{scrapperId}
+        ) X
+        INNER JOIN article A ON A.ID=X.ARTICLE_ID
+        INNER JOIN board B ON B.ID = A.BOARD_ID
+        <include refid="sql-filter"/>
+        ORDER BY SCRAPPED_ON DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="selectFromTag" resultMap="map-article">
+        SELECT
+        A.ID,
+        B.ID AS BOARD_ID,
+        B.NAME AS BOARD_NAME,
+        A.WRITER_ID,
+        A.WRITER_NAME,
+        A.WROTE_ON,
+        A.TITLE,
+        SUBSTRING(A.BODY,1,100) AS BODY_REDUCED,
+        A.HIT_COUNT,
+        (SELECT COUNT(*) FROM article_scrap S WHERE A.ID = S.ARTICLE_ID) AS SCRAP_COUNT,
+        IF(A.STATUS='BLOCKED', 'TRUE','FALSE') AS BLOCKED,
+        IF(A.STATUS='DELETED', 'TRUE','FALSE') AS DELETED,
+        IF(A.STATUS='DELETED_FORCE', 'TRUE','FALSE') AS DELETED_FORCE,
+        IF(A.CHOOSED_ON IS NOT NULL, 'TRUE','FALSE') AS CHOOSED,
+        A.STATUS
+        FROM (
+        SELECT *
+        FROM article_tag T
+        WHERE T.NAME=#{tag}
+        ) X
+        INNER JOIN article A ON A.ID=X.ARTICLE_ID
+        INNER JOIN board B ON B.ID = A.BOARD_ID
+        <include refid="sql-filter"/>
+        ORDER BY WROTE_ON DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT
+        COUNT(*)
+        FROM article A
+        INNER JOIN board B ON B.ID = A.BOARD_ID
+        <include refid="sql-filter"/>
+    </select>
+    <select id="countFromScrap" resultType="long">
+        SELECT
+        COUNT(*)
+        FROM (SELECT * FROM article_scrap S
+        WHERE S.SCRAPPER_ID=#{scrapperId}
+        ) X
+        INNER JOIN article A ON A.ID=X.ARTICLE_ID
+        INNER JOIN board B ON B.ID = A.BOARD_ID
+        <include refid="sql-filter"/>
+    </select>
+    <select id="countFromTag" resultType="long">
+        SELECT
+        COUNT(*)
+        FROM (SELECT * FROM article_tag T
+        WHERE T.NAME=#{tag}
+        ) X
+        INNER JOIN article A ON A.ID=X.ARTICLE_ID
+        INNER JOIN board B ON B.ID = A.BOARD_ID
+        <include refid="sql-filter"/>
+    </select>
+    <select id="countScrapByArticleId" resultType="long">
+        SELECT COUNT(*)
+        FROM article_scrap S
+        WHERE S.ARTICLE_ID=#{articleId}
+    </select>
+    <select id="_selectTags" resultType="string">
+        SELECT
+        T.NAME
+        FROM article_tag T
+        WHERE T.ARTICLE_ID=#{articleId}
+    </select>
+
+    <resultMap id="map-article" type="org.okky.article.domain.repository.dto.ArticleDto">
+        <id property="id" column="ID"/>
+        <collection property="tags" column="ID" select="_selectTags"/>
+    </resultMap>
+</mapper>
