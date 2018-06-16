@@ -4,7 +4,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 import org.okky.share.domain.Aggregate;
 import org.okky.share.execption.ModelConflicted;
 import org.okky.share.util.JsonUtil;
@@ -35,7 +34,6 @@ import static org.okky.share.domain.AssertionConcern.*;
                 @Index(name = "I_BOARD_ID", columnList = "BOARD_ID")
         }
 )
-@Audited
 public class Article implements Aggregate {
     @Id
     @Column(length = 50)
@@ -45,13 +43,14 @@ public class Article implements Aggregate {
     private String boardId;
 
     @Column(nullable = false, length = 150)
+    @Audited
     private String title;
 
     @Column(nullable = false, length = 3000)
+    @Audited
     private String body;
 
     @Column(nullable = false)
-    @NotAudited
     private String writerId;
 
     @Column(nullable = false)
@@ -67,12 +66,10 @@ public class Article implements Aggregate {
             joinColumns = @JoinColumn(name = "ARTICLE_ID")
     )
     @OrderColumn(name = "IDX", columnDefinition = "BIGINT UNSIGNED")
-    @NotAudited
     private List<String> tags;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    @NotAudited
     private long wroteOn;
 
     @LastModifiedDate
@@ -80,12 +77,11 @@ public class Article implements Aggregate {
     private long updatedOn;
 
     @Column(columnDefinition = "BIGINT UNSIGNED")
-    @NotAudited
     private Long choosedOn;
 
     @Enumerated(STRING)
     @Column(nullable = false, length = 30)
-    @NotAudited
+    @Audited
     private ArticleStatus status;
 
     public Article(String boardId, String title, String body, String writerId, String writerName, List<String> tags) {
