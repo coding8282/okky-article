@@ -13,5 +13,4 @@ public interface ArticleRepository extends RevisionRepository<Article, String, L
     boolean existsById(String articleId);
     long countByWriterId(String writerId);
     long countByBoardId(String boardId);
-    void delete(Article article);
 }
