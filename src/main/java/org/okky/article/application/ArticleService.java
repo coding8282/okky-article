@@ -26,17 +26,11 @@ public class ArticleService {
     ArticleScrapRepository articleScrapRepository;
     BoardConstraint boardConstraint;
     ArticleConstraint articleConstraint;
+    ModelMapper mapper;
 
     public void write(WriteArticleCommand cmd) {
         boardConstraint.checkExists(cmd.getBoardId());
-        Article article = new Article(
-                cmd.getBoardId(),
-                cmd.getTitle(),
-                cmd.getBody(),
-                cmd.getWriterId(),
-                cmd.getWriterName(),
-                cmd.getTags()
-        );
+        Article article = mapper.toModel(cmd);
         articleRepository.save(article);
     }
 
