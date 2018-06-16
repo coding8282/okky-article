@@ -19,14 +19,11 @@ import static lombok.AccessLevel.PRIVATE;
 public class BoardService {
     BoardRepository repository;
     BoardConstraint constraint;
+    ModelMapper mapper;
 
     public void create(CreateBoardCommand cmd) {
         constraint.checkUniqueName(cmd.getName());
-        Board board = new Board(
-                cmd.getName(),
-                cmd.getShortDescription(),
-                cmd.getDescription()
-        );
+        Board board = mapper.toModel(cmd);
         repository.save(board);
     }
 

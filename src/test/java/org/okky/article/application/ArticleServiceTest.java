@@ -2,9 +2,11 @@ package org.okky.article.application;
 
 import lombok.experimental.FieldDefaults;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.okky.article.application.command.WriteArticleCommand;
+import org.okky.article.domain.model.Article;
 import org.okky.article.domain.repository.ArticleRepository;
 import org.okky.article.domain.repository.ArticleScrapRepository;
 import org.okky.article.domain.service.ArticleConstraint;
@@ -12,7 +14,7 @@ import org.okky.article.domain.service.BoardConstraint;
 import org.okky.article.domain.service.ServiceTestMother;
 
 import static lombok.AccessLevel.PRIVATE;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @FieldDefaults(level = PRIVATE)
 public class ArticleServiceTest extends ServiceTestMother {
@@ -26,15 +28,34 @@ public class ArticleServiceTest extends ServiceTestMother {
     BoardConstraint boardConstraint;
     @Mock
     ArticleConstraint articleConstraint;
+    @Mock
+    ModelMapper mapper;
+    @Mock
+    Article article;
 
     @Test
     public void write() {
-        WriteArticleCommand cmd = mock(WriteArticleCommand.class);
+        WriteArticleCommand cmd = new WriteArticleCommand("b-1", "1", "2", "3", "4", null);
+        when(mapper.toModel(cmd)).thenReturn(article);
 
         service.write(cmd);
+
+        InOrder o = inOrder(boardConstraint, mapper, articleRepository);
+        o.verify(boardConstraint).checkExists("b-1");
+        o.verify(mapper).toModel(cmd);
+        o.verify(articleRepository).save(article);
     }
 
     @Test
-    public void toggleScrap() {
+    public void remove() {
+        Article article = mock(Article.class);
+        when(articleConstraint.checkExistsAndGet("a-1")).thenReturn(article);
+
+        service.remove("a-1");
+
+        InOrder o = inOrder(articleConstraint, article);
+        o.verify(articleConstraint).rejectRemoveIfHasReplies("a-1");
+        o.verify(articleConstraint).checkExistsAndGet("a-1");
+        o.verify(article).markDelete();
     }
 }
