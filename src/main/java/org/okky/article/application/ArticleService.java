@@ -29,7 +29,14 @@ public class ArticleService {
 
     public void write(WriteArticleCommand cmd) {
         boardConstraint.checkExists(cmd.getBoardId());
-        Article article = ModelMapper.toArticle(cmd);
+        Article article = new Article(
+                cmd.getBoardId(),
+                cmd.getTitle(),
+                cmd.getBody(),
+                cmd.getWriterId(),
+                cmd.getWriterName(),
+                cmd.getTags()
+        );
         articleRepository.save(article);
     }
 

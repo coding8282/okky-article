@@ -22,7 +22,11 @@ public class BoardService {
 
     public void create(CreateBoardCommand cmd) {
         constraint.checkUniqueName(cmd.getName());
-        Board board = ModelMapper.toBoard(cmd);
+        Board board = new Board(
+                cmd.getName(),
+                cmd.getShortDescription(),
+                cmd.getDescription()
+        );
         repository.save(board);
     }
 
