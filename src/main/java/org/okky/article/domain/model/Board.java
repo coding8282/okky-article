@@ -3,6 +3,7 @@ package org.okky.article.domain.model;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.okky.share.domain.Aggregate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,32 +15,34 @@ import javax.persistence.Id;
 import java.util.UUID;
 
 import static java.lang.String.format;
+import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static org.okky.share.domain.AssertionConcern.assertArgLength;
 import static org.okky.share.domain.AssertionConcern.assertArgNotNull;
 
 @NoArgsConstructor(access = PROTECTED)
 @EqualsAndHashCode(of = "id", callSuper = false)
+@FieldDefaults(level = PRIVATE)
 @Getter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Board implements Aggregate {
     @Id
     @Column(length = 50)
-    private String id;
+    String id;
 
     @Column(nullable = false, length = 20)
-    private String name;
+    String name;
 
     @Column(nullable = false, length = 30)
-    private String shortDescription;
+    String shortDescription;
 
     @Column(nullable = false, length = 200)
-    private String description;
+    String description;
 
     @CreatedDate
     @Column(nullable = false)
-    private long createdOn;
+    long createdOn;
 
     public Board(String name, String shortDescription, String description) {
         setId("b-" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 15));

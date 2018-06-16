@@ -3,6 +3,7 @@ package org.okky.article.domain.model;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.envers.Audited;
 import org.okky.share.domain.Aggregate;
 import org.okky.share.execption.ModelConflicted;
@@ -20,12 +21,14 @@ import java.util.UUID;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static javax.persistence.EnumType.STRING;
+import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static org.okky.article.domain.model.ArticleStatus.*;
 import static org.okky.share.domain.AssertionConcern.*;
 
 @NoArgsConstructor(access = PROTECTED)
 @EqualsAndHashCode(of = "id", callSuper = false)
+@FieldDefaults(level = PRIVATE)
 @Getter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -37,27 +40,27 @@ import static org.okky.share.domain.AssertionConcern.*;
 public class Article implements Aggregate {
     @Id
     @Column(length = 50)
-    private String id;
+    String id;
 
     @Column(name = "BOARD_ID", nullable = false, length = 50)
-    private String boardId;
+    String boardId;
 
     @Column(nullable = false, length = 150)
     @Audited
-    private String title;
+    String title;
 
     @Column(nullable = false, length = 3000)
     @Audited
-    private String body;
+    String body;
 
     @Column(nullable = false)
-    private String writerId;
+    String writerId;
 
     @Column(nullable = false)
-    private String writerName;
+    String writerName;
 
     @Column(nullable = false, columnDefinition = "BIGINT UNSIGNED")
-    private long hitCount;
+    long hitCount;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "NAME", nullable = false)
@@ -66,23 +69,23 @@ public class Article implements Aggregate {
             joinColumns = @JoinColumn(name = "ARTICLE_ID")
     )
     @OrderColumn(name = "IDX", columnDefinition = "BIGINT UNSIGNED")
-    private List<String> tags;
+    List<String> tags;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private long wroteOn;
+    long wroteOn;
 
     @LastModifiedDate
     @Column
-    private long updatedOn;
+    long updatedOn;
 
     @Column(columnDefinition = "BIGINT UNSIGNED")
-    private Long choosedOn;
+    Long choosedOn;
 
     @Enumerated(STRING)
     @Column(nullable = false, length = 30)
     @Audited
-    private ArticleStatus status;
+    ArticleStatus status;
 
     public Article(String boardId, String title, String body, String writerId, String writerName, List<String> tags) {
         setId("a-" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 15));
