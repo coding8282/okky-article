@@ -10,6 +10,7 @@ import java.util.Optional;
 @RepositoryDefinition(domainClass = ArticleScrap.class, idClass = String.class)
 public interface ArticleScrapRepository {
     void save(ArticleScrap scrap);
+    void saveAndFlush(ArticleScrap scrap);
     @Query("from ArticleScrap s " +
             "where s.articleId = :articleId " +
             "and s.scrapperId = :scrapperId ")

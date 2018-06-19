@@ -4,6 +4,7 @@ import lombok.experimental.FieldDefaults;
 import org.junit.Test;
 import org.okky.article.domain.model.ArticleScrap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.hamcrest.Matchers.is;
@@ -25,14 +26,24 @@ public class ArticleScrapRepositoryTest extends RepositoryTestMother {
     }
 
     @Test
-    public void saveAndFind_없을_때() {
+    public void saveAndFind_없을_때_확인() {
         boolean present = repository.find("a-1", "s-1").isPresent();
 
         assertFalse("없을 때는 false를 반환해야 한다.", present);
     }
 
+    @Test
+    public void articleId_scrapperId_유니크_제약조건_확인() {
+        expect(DataIntegrityViolationException.class);
+
+        repository.saveAndFlush(fixture());
+        repository.saveAndFlush(fixture());
+    }
+
     // ---------------------------------------------------
     private ArticleScrap fixture() {
-        return ArticleScrap.sample();
+        String articleId = "article-id";
+        String scrapperId = "m-30004";
+        return new ArticleScrap(articleId, scrapperId);
     }
 }
