@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.okky.share.domain.Aggregate;
-import org.okky.share.domain.AssertionConcern;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -13,6 +12,7 @@ import java.util.UUID;
 import static java.lang.System.currentTimeMillis;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static org.okky.share.domain.AssertionConcern.assertArgNotNull;
 
 @NoArgsConstructor(access = PROTECTED)
 @EqualsAndHashCode(of = "id", callSuper = false)
@@ -58,17 +58,17 @@ public class ArticleScrap implements Aggregate {
 
     // -----------------------------------------------------
     private void setId(String id) {
-        AssertionConcern.assertArgNotNull(id, "id는 필수입니다.");
+        assertArgNotNull(id, "id는 필수입니다.");
         this.id = id;
     }
 
     private void setArticleId(String articleId) {
-        AssertionConcern.assertArgNotNull(articleId, "게시글 id는 필수입니다.");
+        assertArgNotNull(articleId, "게시글 id는 필수입니다.");
         this.articleId = articleId;
     }
 
     private void setScrapperId(String scrapperId) {
-        AssertionConcern.assertArgNotNull(scrapperId, "scrapper id는 필수입니다.");
+        assertArgNotNull(scrapperId, "scrapper id는 필수입니다.");
         this.scrapperId = scrapperId;
     }
 
