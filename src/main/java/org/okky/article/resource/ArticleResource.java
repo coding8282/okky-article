@@ -25,6 +25,7 @@ class ArticleResource {
     ArticleService service;
     ArticleMapper mapper;
     ArticleRepository repository;
+    ContextHolder holder;
 
     @GetMapping(value = "/articles", produces = APPLICATION_JSON_VALUE)
     PagingEnvelop getArticles(
@@ -84,7 +85,7 @@ class ArticleResource {
             @RequestParam(defaultValue = "desc") String order,
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "20") int pageSize) {
-        return getArticles(null, ContextHelper.getId(), null, search, sort, order, pageNo, pageSize);
+        return getArticles(null, holder.getId(), null, search, sort, order, pageNo, pageSize);
     }
 
     @GetMapping(value = "/members/me/articles/scrapped", produces = APPLICATION_JSON_VALUE)
@@ -93,11 +94,11 @@ class ArticleResource {
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "20") int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("scrapperId", ContextHelper.getId());
+        params.put("scrapperId", holder.getId());
         params.put("search", search);
         params.put("offset", (pageNo - 1) * pageSize);
         params.put("limit", pageSize);
-        params.put("myId", ContextHelper.getId());
+        params.put("myId", holder.getId());
 
         List<ArticleDto> dtos = mapper.selectFromScrap(params);
         long totalCount = mapper.countFromScrap(params);
@@ -122,7 +123,7 @@ class ArticleResource {
 
     @GetMapping(value = "/articles/{articleId}", produces = APPLICATION_JSON_VALUE)
     ArticleDto get(@PathVariable String articleId) {
-        return mapper.selectOne(articleId, ContextHelper.getId());
+        return mapper.selectOne(articleId, holder.getId());
     }
 
     @GetMapping(value = "/articles/{articleId}/exists")
@@ -149,7 +150,7 @@ class ArticleResource {
             @PathVariable String boardId,
             @RequestBody WriteArticleCommand cmd) {
         cmd.setBoardId(boardId);
-        cmd.setWriterId(ContextHelper.getId());
+        cmd.setWriterId(holder.getId());
         service.write(cmd);
     }
 
@@ -162,7 +163,7 @@ class ArticleResource {
     @PutMapping(value = "/articles/{articleId}/scraps/toggle")
     long toggleScrap(
             @PathVariable String articleId) {
-        service.toggleScrap(articleId, ContextHelper.getId());
+        service.toggleScrap(articleId, holder.getId());
         return mapper.countScrapByArticleId(articleId);
     }
 

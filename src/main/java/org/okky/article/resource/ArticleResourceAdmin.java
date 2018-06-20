@@ -20,12 +20,13 @@ class ArticleResourceAdmin {
     ArticleService service;
     ArticleMapper mapper;
     ArticleRepository repository;
+    ContextHolder holder;
 
     @PostMapping(value = "/boards/notice/articles", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(CREATED)
     void writeNotice(@RequestBody WriteArticleCommand cmd) {
         cmd.setBoardId("notice");
-        cmd.setWriterId(ContextHelper.getId());
+        cmd.setWriterId(holder.getId());
         service.write(cmd);
     }
 

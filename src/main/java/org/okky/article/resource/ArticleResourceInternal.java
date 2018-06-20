@@ -19,9 +19,10 @@ class ArticleResourceInternal {
     ArticleService service;
     ArticleMapper mapper;
     ArticleRepository repository;
+    ContextHolder holder;
 
     @GetMapping(value = "/articles/{articleId}", produces = APPLICATION_JSON_VALUE)
     ArticleDto get(@PathVariable String articleId) {
-        return mapper.selectOne(articleId, ContextHelper.getId());
+        return mapper.selectOne(articleId, holder.getId());
     }
 }
