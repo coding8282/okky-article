@@ -27,7 +27,7 @@ import static org.okky.article.domain.model.ArticleStatus.*;
 import static org.okky.share.domain.AssertionConcern.*;
 
 @NoArgsConstructor(access = PROTECTED)
-@EqualsAndHashCode(of = "id", callSuper = false)
+@EqualsAndHashCode(of = "id")
 @FieldDefaults(level = PRIVATE)
 @Getter
 @Entity
