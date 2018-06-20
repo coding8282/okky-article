@@ -146,12 +146,12 @@ class ArticleResource {
 
     @PostMapping(value = "/boards/{boardId}/articles", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(CREATED)
-    void write(
+    String write(
             @PathVariable String boardId,
             @RequestBody WriteArticleCommand cmd) {
         cmd.setBoardId(boardId);
         cmd.setWriterId(holder.getId());
-        service.write(cmd);
+        return service.write(cmd);
     }
 
     @PostMapping(value = "/articles/{articleId}/hit-count/increase")

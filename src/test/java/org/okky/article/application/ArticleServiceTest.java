@@ -14,6 +14,7 @@ import org.okky.article.domain.service.BoardConstraint;
 import org.okky.article.domain.service.ServiceTestMother;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @FieldDefaults(level = PRIVATE)
@@ -37,8 +38,10 @@ public class ArticleServiceTest extends ServiceTestMother {
     public void write() {
         WriteArticleCommand cmd = new WriteArticleCommand("b-1", "1", "2", "3", "4", null);
         when(mapper.toModel(cmd)).thenReturn(article);
+        when(article.getId()).thenReturn("a-1234");
 
-        service.write(cmd);
+        String id = service.write(cmd);
+        assertEquals("게시글이 성공적으로 생성되었으므로 아이디를 반환해야 한다.", "a-1234", id);
 
         InOrder o = inOrder(boardConstraint, mapper, articleRepository);
         o.verify(boardConstraint).checkExists("b-1");

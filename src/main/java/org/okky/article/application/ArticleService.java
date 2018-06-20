@@ -28,10 +28,14 @@ public class ArticleService {
     ArticleConstraint articleConstraint;
     ModelMapper mapper;
 
-    public void write(WriteArticleCommand cmd) {
+    /**
+     * @return 쓴 게시글 id
+     */
+    public String write(WriteArticleCommand cmd) {
         boardConstraint.checkExists(cmd.getBoardId());
         Article article = mapper.toModel(cmd);
         articleRepository.save(article);
+        return article.getId();
     }
 
     @PreAuthorize("@articleSecurityInspector.isThisWriter(#cmd.articleId)")
