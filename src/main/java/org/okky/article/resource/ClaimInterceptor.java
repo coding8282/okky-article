@@ -28,17 +28,12 @@ public class ClaimInterceptor extends HandlerInterceptorAdapter {
         String id = request.getHeader("X-Requester-Id");
         String groups = Objects.toString(request.getHeader("X-Requester-Groups"), "");
 
-        List<GrantedAuthority> authorities = getAuthorities(groups);
+        List<GrantedAuthority> authorities = stream(groups.split(","))
+                .map(this::toAuthority)
+                .collect(toList());
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(id, null, authorities);
         holder.setAuthentication(authentication);
         return true;
-    }
-
-    // ---------------------------------------------------------
-    private List<GrantedAuthority> getAuthorities(String groups) {
-        return stream(groups.split(","))
-                .map(this::toAuthority)
-                .collect(toList());
     }
 
     private SimpleGrantedAuthority toAuthority(String group) {
