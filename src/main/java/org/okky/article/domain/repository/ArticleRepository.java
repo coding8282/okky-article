@@ -8,9 +8,10 @@ import java.util.Optional;
 
 @RepositoryDefinition(domainClass = Article.class, idClass = String.class)
 public interface ArticleRepository extends RevisionRepository<Article, String, Long> {
+    boolean existsById(String articleId);
+    boolean existsByIdAndWriterId(String articleId, String writerId);
     void save(Article article);
     Optional<Article> findById(String id);
-    boolean existsById(String articleId);
     long countByWriterId(String writerId);
     long countByBoardId(String boardId);
 }

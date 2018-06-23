@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static lombok.AccessLevel.PRIVATE;
 import static org.hamcrest.Matchers.is;
@@ -21,6 +22,28 @@ import static org.junit.Assert.*;
 public class ArticleRepositoryTest {
     @Autowired
     ArticleRepository repository;
+
+    @Test
+    public void existsByIdAndWriterId_존재할_경우_true() {
+        Article article1 = withWriterId("w-1");
+        Article article2 = withWriterId("w-2");
+        repository.save(article1);
+        repository.save(article2);
+        boolean exists = repository.existsByIdAndWriterId(article1.getId(), "w-1");
+
+        assertTrue(format("%s 게시글에 %s 작성자가 존재해야 한다.", article1.getId(), "w-1"), exists);
+    }
+
+    @Test
+    public void existsByIdAndWriterId_존재하지_않을_경우_false() {
+        Article article1 = withWriterId("w-1");
+        Article article2 = withWriterId("w-2");
+        repository.save(article1);
+        repository.save(article2);
+        boolean exists = repository.existsByIdAndWriterId(article1.getId(), "w-9");
+
+        assertFalse(format("해당 조합은 존재하지 않으므로 false여야 한다.", exists), exists);
+    }
 
     @Test
     public void saveAndFindById() {
