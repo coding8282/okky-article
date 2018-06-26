@@ -41,6 +41,7 @@ public class ArticleServiceTest extends ServiceTestMother {
         when(article.getId()).thenReturn("a-1234");
 
         String id = service.write(cmd);
+
         assertEquals("게시글이 성공적으로 생성되었으므로 아이디를 반환해야 한다.", "a-1234", id);
 
         InOrder o = inOrder(boardConstraint, mapper, articleRepository);

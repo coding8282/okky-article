@@ -13,8 +13,8 @@ import org.okky.article.domain.service.BoardConstraint;
 import org.okky.article.domain.service.ServiceTestMother;
 
 import static lombok.AccessLevel.PRIVATE;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @FieldDefaults(level = PRIVATE)
 public class BoardServiceTest extends ServiceTestMother {
@@ -64,6 +64,7 @@ public class BoardServiceTest extends ServiceTestMother {
         service.modify(cmd);
 
         InOrder o = inOrder(constraint, board);
+        o.verify(constraint, never()).checkUniqueName(anyString());
         o.verify(board).modify("공지사항", "3", "4");
     }
 
