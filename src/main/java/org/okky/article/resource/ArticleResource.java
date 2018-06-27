@@ -3,14 +3,12 @@ package org.okky.article.resource;
 import lombok.AllArgsConstructor;
 import org.okky.article.application.ArticleService;
 import org.okky.article.application.command.ModifyArticleCommand;
-import org.okky.article.application.command.MoveArticleCommand;
 import org.okky.article.application.command.WriteArticleCommand;
 import org.okky.article.domain.repository.ArticleMapper;
 import org.okky.article.domain.repository.ArticleRepository;
 import org.okky.article.domain.repository.dto.ArticleDto;
 import org.okky.share.PagingEnvelop;
 import org.okky.share.execption.ResourceNotFound;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,6 +25,7 @@ class ArticleResource {
     ArticleService service;
     ArticleMapper mapper;
     ArticleRepository repository;
+    ContextHolder holder;
 
     @GetMapping(value = "/articles", produces = APPLICATION_JSON_VALUE)
     PagingEnvelop getArticles(
@@ -86,7 +85,7 @@ class ArticleResource {
             @RequestParam(defaultValue = "desc") String order,
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "20") int pageSize) {
-        return getArticles(null, ContextHelper.getId(), null, search, sort, order, pageNo, pageSize);
+        return getArticles(null, holder.getId(), null, search, sort, order, pageNo, pageSize);
     }
 
     @GetMapping(value = "/members/me/articles/scrapped", produces = APPLICATION_JSON_VALUE)
@@ -95,11 +94,11 @@ class ArticleResource {
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "20") int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("scrapperId", ContextHelper.getId());
+        params.put("scrapperId", holder.getId());
         params.put("search", search);
         params.put("offset", (pageNo - 1) * pageSize);
         params.put("limit", pageSize);
-        params.put("myId", ContextHelper.getId());
+        params.put("myId", holder.getId());
 
         List<ArticleDto> dtos = mapper.selectFromScrap(params);
         long totalCount = mapper.countFromScrap(params);
@@ -124,7 +123,7 @@ class ArticleResource {
 
     @GetMapping(value = "/articles/{articleId}", produces = APPLICATION_JSON_VALUE)
     ArticleDto get(@PathVariable String articleId) {
-        return mapper.selectOne(articleId, ContextHelper.getId());
+        return mapper.selectOne(articleId, holder.getId());
     }
 
     @GetMapping(value = "/articles/{articleId}/exists")
@@ -147,19 +146,12 @@ class ArticleResource {
 
     @PostMapping(value = "/boards/{boardId}/articles", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(CREATED)
-    void write(
+    String write(
             @PathVariable String boardId,
             @RequestBody WriteArticleCommand cmd) {
         cmd.setBoardId(boardId);
-        cmd.setWriterId(ContextHelper.getId());
-        service.write(cmd);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @PostMapping(value = "/boards/notice/articles", consumes = APPLICATION_JSON_VALUE)
-    @ResponseStatus(CREATED)
-    void writeNotice(@RequestBody WriteArticleCommand cmd) {
-        write("notice", cmd);
+        cmd.setWriterId(holder.getId());
+        return service.write(cmd);
     }
 
     @PostMapping(value = "/articles/{articleId}/hit-count/increase")
@@ -171,22 +163,8 @@ class ArticleResource {
     @PutMapping(value = "/articles/{articleId}/scraps/toggle")
     long toggleScrap(
             @PathVariable String articleId) {
-        service.toggleScrap(articleId, ContextHelper.getId());
+        service.toggleScrap(articleId, holder.getId());
         return mapper.countScrapByArticleId(articleId);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @PutMapping(value = "/articles/{articleId}/choices/toggle")
-    @ResponseStatus(NO_CONTENT)
-    void toggleChoice(@PathVariable String articleId) {
-        service.toggleChoice(articleId);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @PutMapping(value = "/articles/{articleId}/blocks/toggle")
-    @ResponseStatus(NO_CONTENT)
-    void toggleBlock(@PathVariable String articleId) {
-        service.toggleBlock(articleId);
     }
 
     @PutMapping(value = "/articles/{articleId}", consumes = APPLICATION_JSON_VALUE)
@@ -196,24 +174,9 @@ class ArticleResource {
         service.modify(cmd);
     }
 
-    @Secured("ROLE_ADMIN")
-    @PutMapping(value = "/articles/{articleId}/move")
-    @ResponseStatus(NO_CONTENT)
-    void move(@PathVariable String articleId, @RequestParam("id") String boardId) {
-        MoveArticleCommand cmd = new MoveArticleCommand(articleId, boardId);
-        service.move(cmd);
-    }
-
     @DeleteMapping(value = "/articles/{articleId}")
     @ResponseStatus(NO_CONTENT)
     void delete(@PathVariable String articleId) {
         service.remove(articleId);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping(value = "/articles/{articleId}/force")
-    @ResponseStatus(NO_CONTENT)
-    void deleteForce(@PathVariable String articleId) {
-        service.removeForce(articleId);
     }
 }

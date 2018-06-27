@@ -1,20 +1,23 @@
 package org.okky.article.domain.service;
 
 import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.okky.article.domain.model.Board;
 import org.okky.article.domain.repository.ArticleRepository;
 import org.okky.article.domain.repository.BoardRepository;
-import org.springframework.stereotype.Service;
 import org.okky.share.execption.ModelConflicted;
 import org.okky.share.execption.ModelNotExists;
+import org.springframework.stereotype.Service;
 
 import static java.lang.String.format;
+import static lombok.AccessLevel.PRIVATE;
 
 @Service
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class BoardConstraint {
-    private BoardRepository boardRepository;
-    private ArticleRepository articleRepository;
+    BoardRepository boardRepository;
+    ArticleRepository articleRepository;
 
     public void checkExists(String boardId) {
         checkExistsAndGet(boardId);

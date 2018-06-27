@@ -1,23 +1,26 @@
 package org.okky.article.domain.service;
 
 import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.okky.article.domain.model.Article;
 import org.okky.article.domain.repository.ArticleRepository;
+import org.okky.share.execption.ExternalServiceError;
+import org.okky.share.execption.ModelConflicted;
+import org.okky.share.execption.ModelNotExists;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.okky.share.execption.ExternalServiceError;
-import org.okky.share.execption.ModelConflicted;
-import org.okky.share.execption.ModelNotExists;
 
 import static java.lang.String.format;
+import static lombok.AccessLevel.PRIVATE;
 
 @Service
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class ArticleConstraint {
-    private ArticleRepository repository;
-    private RestTemplate template;
+    ArticleRepository repository;
+    RestTemplate template;
 
     public void checkExists(String articleId) {
         checkExistsAndGet(articleId);

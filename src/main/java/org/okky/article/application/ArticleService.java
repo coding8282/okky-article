@@ -1,6 +1,7 @@
 package org.okky.article.application;
 
 import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.okky.article.application.command.ModifyArticleCommand;
 import org.okky.article.application.command.MoveArticleCommand;
 import org.okky.article.application.command.WriteArticleCommand;
@@ -14,19 +15,27 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static lombok.AccessLevel.PRIVATE;
+
 @Service
 @Transactional
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class ArticleService {
-    private ArticleRepository articleRepository;
-    private ArticleScrapRepository articleScrapRepository;
-    private BoardConstraint boardConstraint;
-    private ArticleConstraint articleConstraint;
+    ArticleRepository articleRepository;
+    ArticleScrapRepository articleScrapRepository;
+    BoardConstraint boardConstraint;
+    ArticleConstraint articleConstraint;
+    ModelMapper mapper;
 
-    public void write(WriteArticleCommand cmd) {
+    /**
+     * @return 쓴 게시글 id
+     */
+    public String write(WriteArticleCommand cmd) {
         boardConstraint.checkExists(cmd.getBoardId());
-        Article article = ModelMapper.toArticle(cmd);
+        Article article = mapper.toModel(cmd);
         articleRepository.save(article);
+        return article.getId();
     }
 
     @PreAuthorize("@articleSecurityInspector.isThisWriter(#cmd.articleId)")
