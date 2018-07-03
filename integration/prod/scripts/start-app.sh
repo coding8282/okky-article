@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
-nohup java -jar \
-/home/ec2-user/okky-article-1.0.0.jar \
---spring.profiles.active=prod > /dev/null 2> /dev/null < /dev/null &
+sudo chmod +x /home/ec2-user/okky-article-1.0.0.jar
+sudo ln -sf /home/ec2-user/okky-article-1.0.0.jar /etc/init.d/okky-article
+sudo service okky-article start
+sleep 10s
