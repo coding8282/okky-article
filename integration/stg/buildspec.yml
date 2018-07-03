@@ -8,6 +8,7 @@ phases:
 artifacts:
   files:
     - integration/stg/appspec.yml
+    - integration/stg/config/*
     - integration/stg/scripts/*
     - target/okky-article-1.0.0.jar
   discard-paths: yes
