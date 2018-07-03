@@ -2,10 +2,6 @@ version: 0.0
 os: linux
 
 files:
-  - source: awscli.conf
-    destination: /etc/awslogs
-  - source: awslogs.conf
-    destination: /etc/awslogs
   - source: okky-article-1.0.0.jar
     destination: /home/ec2-user
 
@@ -16,8 +12,6 @@ hooks:
   AfterInstall:
     - location: start-app.sh
       timeout: 120
-    - location: configure-app.sh
-      timeout: 20
   ValidateService:
     - location: validate-app.sh
       timeout: 120
