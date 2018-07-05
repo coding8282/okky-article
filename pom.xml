@@ -190,7 +190,7 @@
                     <id>okky-snapshot</id>
                     <url>s3://okky-mvn-repo/prod/snapshot</url>
                     <snapshots>
-                        <updatePolicy>daily</updatePolicy>
+                        <updatePolicy>interval:30</updatePolicy>
                     </snapshots>
                 </repository>
             </repositories>
