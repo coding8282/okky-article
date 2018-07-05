@@ -6,15 +6,22 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.okky.article.application.command.WriteArticleCommand;
+import org.okky.article.domain.event.DomainEventPublisher;
 import org.okky.article.domain.model.Article;
+import org.okky.article.domain.model.ArticleScrap;
 import org.okky.article.domain.repository.ArticleRepository;
 import org.okky.article.domain.repository.ArticleScrapRepository;
 import org.okky.article.domain.service.ArticleConstraint;
 import org.okky.article.domain.service.BoardConstraint;
 import org.okky.article.domain.service.ServiceTestMother;
+import org.okky.share.event.ArticleScrapped;
+import org.powermock.api.mockito.PowerMockito;
+
+import java.util.Optional;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
 @FieldDefaults(level = PRIVATE)
@@ -33,6 +40,8 @@ public class ArticleServiceTest extends ServiceTestMother {
     ModelMapper mapper;
     @Mock
     Article article;
+    @Mock
+    ArticleScrap scrap;
 
     @Test
     public void write() {
@@ -52,7 +61,6 @@ public class ArticleServiceTest extends ServiceTestMother {
 
     @Test
     public void remove() {
-        Article article = mock(Article.class);
         when(articleConstraint.checkExistsAndGet("a-1")).thenReturn(article);
 
         service.remove("a-1");
@@ -61,5 +69,33 @@ public class ArticleServiceTest extends ServiceTestMother {
         o.verify(articleConstraint).rejectRemoveIfHasReplies("a-1");
         o.verify(articleConstraint).checkExistsAndGet("a-1");
         o.verify(article).markDelete();
+    }
+
+    @Test
+    public void toggleScrap_스크랩하지_않은_경우_새_스크랩() {
+        ArticleScrapped event = mock(ArticleScrapped.class);
+        when(articleScrapRepository.find("a", "s")).thenReturn(Optional.empty());
+        when(mapper.toEvent(isA(ArticleScrap.class))).thenReturn(event);
+
+        service.toggleScrap("a", "s");
+
+        InOrder o = inOrder(articleConstraint, articleScrapRepository);
+        o.verify(articleConstraint).checkExists("a");
+        o.verify(articleScrapRepository).save(isA(ArticleScrap.class));
+        o.verifyNoMoreInteractions();
+
+        PowerMockito.verifyStatic(DomainEventPublisher.class);
+        DomainEventPublisher.fire(event);
+    }
+
+    @Test
+    public void toggleScrap_이미_스크랩하한_경우_스크랩_삭제() {
+        when(articleScrapRepository.find("a", "s")).thenReturn(Optional.of(scrap));
+
+        service.toggleScrap("a", "s");
+
+        InOrder o = inOrder(articleScrapRepository);
+        o.verify(articleScrapRepository).delete(scrap);
+        o.verifyNoMoreInteractions();
     }
 }

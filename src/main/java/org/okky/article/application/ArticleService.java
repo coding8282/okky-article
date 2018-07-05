@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.okky.article.application.command.ModifyArticleCommand;
 import org.okky.article.application.command.MoveArticleCommand;
 import org.okky.article.application.command.WriteArticleCommand;
+import org.okky.article.domain.event.DomainEventPublisher;
 import org.okky.article.domain.model.Article;
 import org.okky.article.domain.model.ArticleScrap;
 import org.okky.article.domain.repository.ArticleRepository;
@@ -89,6 +90,7 @@ public class ArticleService {
         articleConstraint.checkExists(articleId);
         ArticleScrap scrap = new ArticleScrap(articleId, scrapperId);
         articleScrapRepository.save(scrap);
+        DomainEventPublisher.fire(mapper.toEvent(scrap));
     }
 
     private void unscrap(ArticleScrap scrap) {
